@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>memcore · 记忆检索</title>
+<style>
+  :root{--bg:#0f1115;--panel:#161a22;--panel2:#1b2029;--line:#262c38;--fg:#e6e9ef;--dim:#8b94a7;--accent:#6ea8fe;--warn:#f0b45a;--ok:#5fbf8a;--bad:#e06c75}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  header{display:flex;align-items:baseline;gap:14px;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(15,17,21,.92);backdrop-filter:blur(8px);z-index:5;flex-wrap:wrap}
+  h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.5px}
+  .stats{color:var(--dim);font-size:12px;display:flex;gap:12px;flex-wrap:wrap}
+  .stats b{color:var(--fg);font-weight:600}
+  main{max-width:1080px;margin:0 auto;padding:20px 22px 60px}
+  .search{display:flex;gap:8px;margin:6px 0 18px}
+  input[type=text]{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:12px 14px;font-size:15px;outline:none}
+  input[type=text]:focus{border-color:var(--accent)}
+  select,button{background:var(--panel2);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px 14px;font-size:13px;cursor:pointer}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#0b1020;font-weight:600}
+  .banner{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:13px;display:none}
+  .banner.weak{display:block;border-color:#5c4a22;background:#221c10;color:var(--warn)}
+  .banner.meta{display:block;border-color:#25313f;background:#121a23;color:var(--dim)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .card.meta{opacity:.72;border-style:dashed}
+  .row{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--dim);margin-bottom:6px;flex-wrap:wrap}
+  .pill{border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:11px}
+  .pill.user{color:#9ad0ff;border-color:#27405c}
+  .pill.me{color:#c9b6ff;border-color:#3a2f5c}
+  .pill.thought{color:#8b94a7}
+  .score{margin-left:auto;font-variant-numeric:tabular-nums}
+  .text{white-space:pre-wrap;word-break:break-word}
+  .facts,.decisions{margin:0 0 14px}
+  .chip{display:inline-block;border:1px solid #2a3a52;background:#141c27;color:#9cc3ff;border-radius:999px;padding:2px 10px;font-size:12px;margin:0 6px 6px 0;cursor:pointer}
+  .dec{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
+  .dec .why{color:var(--dim);margin-top:4px}
+  h2{font-size:13px;color:var(--dim);font-weight:600;margin:22px 0 10px;letter-spacing:.4px;text-transform:uppercase}
+  .empty{color:var(--dim);padding:40px 0;text-align:center}
+  .hint{color:var(--dim);font-size:13px;margin-top:6px}
+  .hint p{margin:0 0 10px}
+  .examples .chip{background:var(--panel);color:var(--fg);border-color:var(--line)}
+  .tabs{display:flex;gap:8px;margin-bottom:14px}
+  .tabs button.active{background:var(--accent);color:#0b1020;border-color:var(--accent);font-weight:600}
+  .files{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+  .file{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13px}
+  .file:hover{border-color:var(--accent)}
+  .file small{display:block;color:var(--dim);font-size:11px;margin-top:2px}
+  pre.doc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65}
+  .kbd{font-family:ui-monospace,Consolas,monospace;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>memcore</h1>
+  <div class="stats" id="stats">读取中…</div>
+</header>
+<main>
+  <div class="tabs">
+    <button id="tab-search" class="active">检索</button>
+    <button id="tab-files">档案</button>
+  </div>
+
+  <section id="view-search">
+    <div class="search">
+      <input id="q" type="text" placeholder="问它：我以前说过什么？（Enter 检索）" autocomplete="off" autofocus>
+      <select id="limit">
+        <option value="6">6 条</option>
+        <option value="10" selected>10 条</option>
+        <option value="20">20 条</option>
+      </select>
+      <button class="primary" id="go">检索</button>
+    </div>
+    <div id="hint" class="hint">
+      <p>本地长期记忆：原话、事实、决策、档案，问它就答；问不清时会反问你。</p>
+      <div class="examples" id="examples"></div>
+    </div>
+    <div id="notice"></div>
+    <div id="facts"></div>
+    <div id="decisions"></div>
+    <div id="results"></div>
+  </section>
+
+  <section id="view-files" style="display:none">
+    <div class="files" id="filelist"></div>
+    <div id="docview"></div>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id)
+const esc = (s) => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+
+async function loadStats() {
+  const s = await (await fetch('/api/stats')).json()
+  $('stats').innerHTML = `<span>原话 <b>${s.episodes}</b></span><span>事实 <b>${s.facts}</b></span><span>决策 <b>${s.decisions}</b></span><span>档案 <b>${s.memoryFiles}</b></span><span>${s.dir}</span>`
+}
+
+function roleClass(r) { return r === '用户' ? 'user' : r === '思考' ? 'thought' : 'me' }
+
+const EXAMPLES = [
+  '跨模型接口怎么接',
+  '我以前说过窗口闪烁吗',
+  '为什么没有接语义模型',
+  '记忆文件被改了怎么知道',
+]
+
+function renderExamples() {
+  $('examples').innerHTML = EXAMPLES.map((e) => `<span class="chip">${esc(e)}</span>`).join('')
+  for (const el of document.querySelectorAll('#examples .chip')) {
+    el.onclick = () => { $('q').value = el.textContent; search() }
+  }
+}
+
+async function search() {
+  const q = $('q').value.trim()
+  if (!q) return
+  $('hint').style.display = 'none'
+  const limit = $('limit').value
+  $('notice').innerHTML = ''
+  $('facts').innerHTML = ''
+  $('decisions').innerHTML = ''
+  $('results').innerHTML = '<div class="empty">检索中…</div>'
+  const t0 = performance.now()
+  const r = await (await fetch(`/api/recall?q=${encodeURIComponent(q)}&limit=${limit}`)).json()
+  const ms = Math.round(performance.now() - t0)
+  if (!r.ok) { $('results').innerHTML = `<div class="empty">${esc(r.error)}</div>`; return }
+
+  if (r.confidence) {
+    const c = r.confidence
+    const tag = `覆盖率 ${c.coverage} · 分差 ${c.margin}× · ${ms} ms`
+    if (c.weak) {
+      $('notice').innerHTML = `<div class="banner weak"><b>弱命中，别硬答。</b> ${esc(c.ask || '建议先反问：大概什么时候、记得的关键词、是我说的还是你说的。')}<br><span class="stats">${tag}</span></div>`
+    } else {
+      $('notice').innerHTML = `<div class="banner meta" style="display:block"><span class="stats">${tag}</span></div>`
+    }
+  }
+
+  if (r.facts && r.facts.length) {
+    $('facts').innerHTML = `<h2>事实层命中</h2>` + r.facts.map((f) =>
+      `<span class="chip" title="${esc(f.note || '')}">${esc(f.subject)}${f.bridge ? ' · 别名桥' : ''} · ${f.score}</span>`).join('')
+  }
+
+  if (r.decisions && r.decisions.length) {
+    $('decisions').innerHTML = `<h2>决策台账</h2>` + r.decisions.map((d) =>
+      `<div class="dec"><b>${esc(d.decision)}</b><div class="why">${esc(d.reason)}</div>${d.date ? `<div class="why">${esc(d.date)}</div>` : ''}</div>`).join('')
+  }
+
+  if (!r.items.length) { $('results').innerHTML = '<div class="empty">没有命中</div>'; return }
+  $('results').innerHTML = `<h2>${r.matched} 条命中 · 显示前 ${r.items.length} 条</h2>` + r.items.map((it) => {
+    const t = String(it.text || '')
+    const long = t.length > 320
+    return `<div class="card ${it.meta ? 'meta' : ''}">
+       <div class="row">
+         <span class="pill ${roleClass(it.role)}">${esc(it.role)}</span>
+         <span>${esc(it.at)}</span>
+         <span>${esc(it.session)}</span>
+         ${it.meta ? '<span class="pill">元记录</span>' : ''}
+         <span class="score">${it.score}</span>
+       </div>
+       <div class="text" data-full="${esc(t)}">${esc(long ? t.slice(0, 320) : t)}</div>
+       ${long ? '<button class="more">展开全文</button>' : ''}
+     </div>`
+  }).join('')
+  for (const b of document.querySelectorAll('#results .more')) {
+    b.onclick = () => {
+      const el = b.previousElementSibling
+      const open = b.dataset.open === '1'
+      el.textContent = open ? el.dataset.full.slice(0, 320) : el.dataset.full
+      b.dataset.open = open ? '0' : '1'
+      b.textContent = open ? '展开全文' : '收起'
+    }
+  }
+}
+
+async function loadFiles() {
+  const r = await (await fetch('/api/memory')).json()
+  $('filelist').innerHTML = r.files.map((f) =>
+    `<div class="file" data-id="${esc(f.id)}">${esc(f.title)}<small>${f.lines} 行 · ${f.bytes} B</small></div>`).join('')
+  for (const el of document.querySelectorAll('.file')) el.onclick = () => openDoc(el.dataset.id)
+  $('docview').innerHTML = ''
+}
+
+async function openDoc(id) {
+  const r = await (await fetch('/api/memory/' + encodeURIComponent(id))).json()
+  $('docview').innerHTML = r.ok ? `<h2>${esc(r.title)}</h2><pre class="doc">${esc(r.text)}</pre>` : `<div class="empty">读不到</div>`
+}
+
+$('go').onclick = search
+$('q').onkeydown = (e) => { if (e.key === 'Enter') search() }
+$('tab-search').onclick = () => { $('view-search').style.display = ''; $('view-files').style.display = 'none'; $('tab-search').classList.add('active'); $('tab-files').classList.remove('active') }
+$('tab-files').onclick = () => { $('view-search').style.display = 'none'; $('view-files').style.display = ''; $('tab-files').classList.add('active'); $('tab-search').classList.remove('active'); loadFiles() }
+renderExamples()
+const initial = new URLSearchParams(location.search).get('q')
+if (initial) { $('q').value = initial; search() }
+loadStats()
+</script>
+</body>
+</html>

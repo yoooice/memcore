@@ -1,0 +1,3 @@
+- insert:
+    - id: memcore-panel
+      name: dsh-memcore-panel

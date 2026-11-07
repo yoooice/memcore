@@ -1,0 +1,23 @@
+{
+  "name": "dsh-memcore-panel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "记忆核心（memcore）的客户端面板：左侧栏一级入口，检索原话、管理事实与决策、浏览档案",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "files": ["index.js", "client.js", "cordis.patch.yml", "lib/"],
+  "engines": { "node": ">=20" },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": []
+    }
+  }
+}
