@@ -37,7 +37,7 @@ memcore 走第三条路：**分词 + 打分 + 写入侧结构化**，把力气�
 要求 **Node ≥ 20**，无第三方依赖（`package.json` 里 `dependencies` 是空的，全部用 Node 内置模块）。
 
 ```bash
-git clone https://github.com/yoooice/yooo && cd yooo
+git clone https://github.com/yoooice/memcore && cd yooo
 node cli.mjs stats
 ```
 
