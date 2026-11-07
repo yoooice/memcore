@@ -1,0 +1,52 @@
+[
+  {
+    "id": "install",
+    "title": "安装",
+    "text": "安装只需 Node 20 以上，克隆仓库后直接 node examples/demo.mjs 跑一遍演示。没有依赖，不需要 npm install。数据默认放在 ~/.memcore，可以用 MEMCORE_DIR 改。"
+  },
+  {
+    "id": "mcp",
+    "title": "MCP 接法",
+    "text": "MCP 走 stdio，配置里写 command 为 node、args 指向 mcp.mjs，六个工具：recall、trace、remember、fact_write、decide、stats。Claude Desktop、Cursor、Windsurf 都能用同一份配置。"
+  },
+  {
+    "id": "http",
+    "title": "HTTP 接法",
+    "text": "HTTP 服务用 node server.mjs --port 7474 起，接口 /api/recall、/api/trace、/api/stats、/api/facts、/api/decisions，任何脚本和模型都能调，自带一个网页界面。"
+  },
+  {
+    "id": "facts",
+    "title": "事实层",
+    "text": "事实层存 subject、aliases、note 和有效期。查询和别名的最长公共子串到 3 个字才把 subject 并进查询，避免常用词互相污染。过期的记录不参与检索。"
+  },
+  {
+    "id": "decisions",
+    "title": "决策台账",
+    "text": "决策台账一行一条：决定了什么、为什么、证据、备选。问句里出现为什么、依据、思路这类词时，检索会额外返回台账里最相关的三条。"
+  },
+  {
+    "id": "confidence",
+    "title": "置信度与反问",
+    "text": "每次检索都会算覆盖率和第一名第二名的分差。覆盖率低于三成或分差小于 1.2 倍时标记为弱命中，建议先反问用户，而不是硬给一个像的答案。"
+  },
+  {
+    "id": "tokenizer",
+    "title": "中文切词",
+    "text": "切词用 Intl.Segmenter 取整词，再加连续字母数字段的二元组。消融过：逐字加二元组在档案题上 17/23，换整词后 20/23；加了整词又保留单字反而掉到 16/23。"
+  },
+  {
+    "id": "bench",
+    "title": "评测",
+    "text": "评测脚本在 eval/run.mjs，给一份语料和一份带金标的问题就能跑，输出 Top1、Top3 和 MRR。仓库自带的 fixture 是合成数据，用来演示格式与流程。"
+  },
+  {
+    "id": "panel",
+    "title": "DSH 面板",
+    "text": "DSH 客户端面板在 adapters/dsh-panel，注册到左侧栏一级入口，四页：检索、事实层、决策台账、档案。它只是外壳，内核仍然是 lib/core.mjs。"
+  },
+  {
+    "id": "privacy",
+    "title": "隐私",
+    "text": "所有数据都在本地文件里：episodes.jsonl 是原话，facts.jsonl 是事实，decisions.jsonl 是决策，memory 目录是档案。没有网络请求，没有遥测。"
+  }
+]

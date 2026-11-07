@@ -71,3 +71,44 @@ test('临时记忆目录不污染真实数据', () => {
   assert.ok(fs.existsSync(path.join(docs, 'note.md')))
   assert.ok(!fs.existsSync(path.join(os.homedir(), '.dsh', 'memcore', 'note.md')))
 })
+
+test('回归：向已有档案追加内容，同一实例也能搜到', () => {
+  const { dir, docs } = fixture()
+  const core = createCore({ memoryDir: dir, docsDir: docs })
+  assert.equal(core.recall({ query: '电源适配器' }).matched, 0)
+  fs.appendFileSync(path.join(docs, 'demo.md'), '\n## 新增\n\n灯光闪烁与电源适配器有关。\n', 'utf8')
+  const out = core.recall({ query: '电源适配器' })
+  assert.ok(out.matched >= 1)
+  assert.match(out.items[0].text, /电源适配器/)
+})
+
+test('回归：两个会话条数与末条时间相同，不串缓存', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'memcore-'))
+  const docs = path.join(dir, 'memory')
+  fs.mkdirSync(docs)
+  const t = Date.now()
+  const rows = [
+    { t: t - 1000, r: 'user', x: '把主题改成蓝色', s: 's1' },
+    { t, r: 'assistant', x: '蓝色主题已经生效', s: 's1' },
+    { t: t - 1000, r: 'user', x: '把主题改成绿色', s: 's2' },
+    { t, r: 'assistant', x: '绿色主题已经生效', s: 's2' },
+  ]
+  fs.writeFileSync(path.join(dir, 'episodes.jsonl'), rows.map((r) => JSON.stringify(r)).join('\n') + '\n')
+  const core = createCore({ memoryDir: dir, docsDir: docs })
+  const a = core.recall({ query: '主题改成蓝色还是绿色', session: 's1' })
+  const b = core.recall({ query: '主题改成蓝色还是绿色', session: 's2' })
+  assert.ok(a.items.every((i) => !/绿色/.test(i.text)))
+  assert.ok(b.items.every((i) => !/蓝色/.test(i.text)))
+  assert.match(b.items[0].text, /绿色/)
+})
+
+test('回归：过期事实不参与检索，有效事实仍然参与', () => {
+  const { dir, docs } = fixture()
+  const core = createCore({ memoryDir: dir, docsDir: docs })
+  core.factWrite({ subject: '旧入口', aliases: '老地址', note: '已废弃', validTo: '2020-01-01' })
+  core.factWrite({ subject: '新入口', aliases: '新地址', note: '现在用这个' })
+  const out = core.recall({ query: '老地址 新地址' })
+  const subjects = (out.facts || []).map((f) => f.subject)
+  assert.ok(!subjects.includes('旧入口'))
+  assert.ok(subjects.includes('新入口'))
+})
