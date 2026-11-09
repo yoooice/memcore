@@ -1,6 +1,6 @@
 {
   "name": "memcore-memory",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "本地长期记忆库：会检索、会反问、会自我纠错的记忆层，可接任何模型（MCP / HTTP / CLI），零依赖。",
   "type": "module",
   "bin": {
@@ -12,7 +12,8 @@
     "server.mjs",
     "lib/",
     "ui/",
-    "README.md"
+    "README.md",
+    "README.en.md"
   ],
   "scripts": {
     "start": "node server.mjs",
@@ -30,5 +31,13 @@
     "bm25",
     "local-first"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yoooice/memcore.git"
+  },
+  "homepage": "https://github.com/yoooice/memcore#readme",
+  "bugs": {
+    "url": "https://github.com/yoooice/memcore/issues"
+  },
   "license": "MIT"
 }

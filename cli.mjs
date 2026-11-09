@@ -14,6 +14,11 @@ const core = createCore({ memoryDir: argOf('--dir'), docsDir: argOf('--docs') })
 
 async function main() {
   if (cmd === 'serve') { await import('./server.mjs'); return }
+  if (cmd === 'doctor') {
+    const { runDoctor } = await import('./lib/doctor.mjs')
+    process.exitCode = runDoctor({ dir: argOf('--dir'), docs: argOf('--docs'), profile: argOf('--profile'), json: argv.includes('--json') })
+    return
+  }
   if (cmd === 'recall') {
     const out = core.recall({ query: rest(), limit: Number(argOf('--limit')) || 6 })
     if (!out.matched) return console.log('没有命中')
@@ -45,6 +50,7 @@ async function main() {
   fact   --subject X [--aliases "a,b"] [--note "..."]
   decide --decision "..." --reason "..."
   serve  [--port 7474]
+  doctor [--json] [--profile <DSH profile 目录>]
 全局：--dir <记忆目录>  --docs <档案目录>`)
 }
 main()

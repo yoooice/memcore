@@ -1,5 +1,7 @@
 # memcore
 
+[English](README.en.md) | 中文
+
 **本地长期记忆层，给任何模型接一层「会检索、会反问、会自我纠错」的记忆。**
 零依赖、零服务端、数据只在本机。中文优先。
 
@@ -42,6 +44,49 @@ node cli.mjs stats
 ```
 
 数据目录默认 `~/.memcore`，可用 `--dir` 或环境变量 `MEMCORE_DIR` 指定；档案目录用 `--docs` / `MEMCORE_DOCS`（默认 `<dir>/memory`）。
+
+## 搭配上下文压缩（可选，但长会话推荐）
+
+memcore 解决「记得住」，不解决「装得下」。单会话越跑越长时，先撞墙的是上下文窗口和账单——那是另一件事，交给上下文压缩插件，比如 [billion-context](https://github.com/ranxianglei/billion-context)（MIT）。两者分工不重叠：
+
+| | 管什么 | 数据在哪 |
+| --- | --- | --- |
+| memcore | 历史上说过什么（原话 / 事实 / 决策 / 档案） | 本机 `episodes.jsonl`、`memory/*.md` |
+| billion-context | 这一轮模型能看见多少（折叠旧上下文） | 只改发给模型的请求，不碰记忆文件 |
+
+作者在 DSH 上的实测（单机、单会话，样本数 1，别当通用结论）：一场 288 次请求的会话累计输入 21.2M token，缓存命中 97.1%，11 次折叠净省 30.4M；被折叠掉的段落，原文仍能用 `recall` 按原句召回——**压缩的是上下文，不是档案**。
+
+### 什么时候不需要
+
+- 一次性短任务、单会话不到 100K token：别装。多一个插件、多一层补丁，换不来收益。
+- 多日会话、单场几十万 token 以上、经常撞上下文上限：这时值得。
+
+### 安装（DSH）
+
+在 profile 目录下：
+
+```bash
+dsh plugin --profile desktop add dsh-memcore
+dsh plugin --profile desktop add billion-context@0.1.213
+```
+
+第二行的版本是**测过的组合**；不带版本会拿到上游最新版，通常也能用，但出问题先怀疑版本。
+
+没有 `dsh` 命令时：在 profile 的 `package.json` 里把 `dsh-memcore` 和 `billion-context` 加进 `dsh.profile.bundles`，再在 profile 目录执行 `pnpm install`。少这一步，包在 `node_modules` 里也不会被加载——`doctor` 会把这种「半装」标成失败。
+
+### 装完自检
+
+```bash
+node cli.mjs doctor
+```
+
+只读检查：数据目录对不对、插件有没有真的进 `dsh.profile.bundles`（装了但没进 = 不会被加载，这是最常见的「装了没用」）、billion-context 版本在不在测试矩阵、开场卡最近有没有注入。每项失败都给一条可直接复制的修复命令；**不会改任何文件**。
+
+### 已知限制
+
+- billion-context 的 DSH 集成是一层**加载器补丁**（改 preset 注入、关掉 `compaction-basic`、给 `llm-deepseek` 补重试码），与 DSH 版本强相关。测试矩阵：DSH `0.2.2-rc.1` × billion-context `0.1.212` / `0.1.213`。
+- DSH 升级后如果出现 `agent-preset/invalid`、会话建不起来，先把 billion-context 从 bundles 里移除再排查——它的补丁层是第一个嫌疑人。
+- 责任边界：压缩行为、工具、补丁层归 billion-context 上游；记忆、检索、开场卡归 memcore。压缩出问题去上游开 issue，别在两个仓库之间来回猜。
 
 ## 三种接法
 
@@ -89,6 +134,7 @@ node cli.mjs recall "上次那个 zstd 的事"
 node cli.mjs trace "压缩包"
 node cli.mjs fact --subject dsh-workbench --aliases "工作台" --note "客户端看板插件"
 node cli.mjs decide --decision "检索不到先反问" --reason "硬猜一次比问一句贵"
+node cli.mjs doctor
 node cli.mjs serve
 ```
 
@@ -103,6 +149,7 @@ node cli.mjs serve
 ```
 lib/bm25.mjs    切词与打分（可单独用）
 lib/core.mjs    内核：recall / trace / remember / factWrite / decide / stats / listMemory
+lib/doctor.mjs  只读体检（cli.mjs doctor）
 mcp.mjs         MCP stdio 服务（6 个工具）
 server.mjs      HTTP 服务 + 静态 UI
 cli.mjs         命令行
@@ -168,3 +215,10 @@ node eval/run.mjs --corpus 你的语料.json --queries 你的问题.json
 ## 许可
 
 MIT，见 [LICENSE](LICENSE)。
+
+## 声明
+
+本项目是个人项目，**与 DeepSeek 官方没有任何关联**，也未获其背书。
+
+卫衣上的鲸鱼剪影、以及本项目用到的「大肥鱼」等说法，均指代 DeepSeek 的公开形象与社区昵称，
+仅作标识与致敬使用，不表示任何官方身份或授权关系。
