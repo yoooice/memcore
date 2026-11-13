@@ -7,7 +7,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildIndex, scoreAll } from '../lib/bm25.mjs'
+import { buildIndex, scoreAll } from '../packages/core/lib/bm25.mjs'
 
 function arg(name, fallback) {
   const i = process.argv.indexOf(`--${name}`)

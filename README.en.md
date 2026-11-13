@@ -36,7 +36,7 @@ Node **≥ 20**, no third-party dependencies (the `dependencies` field is empty;
 
 ```bash
 git clone https://github.com/yoooice/memcore && cd memcore
-node cli.mjs stats
+node packages/core/cli.mjs stats
 ```
 
 Data lives in `~/.memcore` by default; override with `--dir` or `MEMCORE_DIR`. Dossiers use `--docs` / `MEMCORE_DOCS` (default `<dir>/memory`).
@@ -73,7 +73,7 @@ No `dsh` command? Add `dsh-memcore` and `billion-context` to `dsh.profile.bundle
 ### Self-check after install
 
 ```bash
-node cli.mjs doctor
+node packages/core/cli.mjs doctor
 ```
 
 Read-only checks: is the data directory right, did the plugin actually enter `dsh.profile.bundles` (installed but absent from bundles = never loaded — the most common "I installed it and nothing happened"), is the billion-context version within the tested matrix, was the opening card injected recently. Every failure prints a copy-pasteable fix; **it writes nothing**.
@@ -93,7 +93,7 @@ Read-only checks: is the data directory right, did the plugin actually enter `ds
   "mcpServers": {
     "memcore": {
       "command": "node",
-      "args": ["D:/path/to/memcore/mcp.mjs"],
+      "args": ["D:/path/to/memcore/packages/core/mcp.mjs"],
       "env": { "MEMCORE_DIR": "C:/Users/you/.memcore", "MEMCORE_DOCS": "C:/Users/you/notes" }
     }
   }
@@ -105,7 +105,7 @@ Tools: `recall`, `trace`, `remember`, `fact_write`, `decide`, `stats`. Full exam
 ### 2. HTTP (any language, any model, any agent)
 
 ```bash
-node server.mjs --port 7474
+node packages/core/server.mjs --port 7474
 ```
 
 ```bash
@@ -126,33 +126,33 @@ const context = mem.items.map((it) => `[${it.at}] ${it.role}: ${it.text}`).join(
 ### 3. CLI
 
 ```bash
-node cli.mjs recall "that zstd thing from before"
-node cli.mjs trace "archive"
-node cli.mjs fact --subject dsh-workbench --aliases "workbench" --note "client dashboard plugin"
-node cli.mjs decide --decision "ask back when retrieval is weak" --reason "one guess costs more than one question"
-node cli.mjs doctor
-node cli.mjs serve
+node packages/core/cli.mjs recall "that zstd thing from before"
+node packages/core/cli.mjs trace "archive"
+node packages/core/cli.mjs fact --subject dsh-workbench --aliases "workbench" --note "client dashboard plugin"
+node packages/core/cli.mjs decide --decision "ask back when retrieval is weak" --reason "one guess costs more than one question"
+node packages/core/cli.mjs doctor
+node packages/core/cli.mjs serve
 ```
 
 ### 4. DSH client panel (optional)
 
-`adapters/dsh-panel/` is a sidebar panel for DSH (DeepSeek Harness): same in-process kernel, no extra port, a "Memory core" entry in the left rail with four pages — search / facts / decisions / dossiers. Install instructions in `adapters/dsh-panel/README.md`. The panel is only a shell; deleting it does not affect the three connections above.
+`packages/dsh-panel/` is a sidebar panel for DSH (DeepSeek Harness): same in-process kernel, no extra port, a "Memory core" entry in the left rail with four pages — search / facts / decisions / dossiers. Install instructions in `packages/dsh-panel/README.md`. The panel is only a shell; deleting it does not affect the three connections above.
 
 ## Layout
 
 ```
 lib/bm25.mjs    tokenization and scoring (usable standalone)
 lib/core.mjs    kernel: recall / trace / remember / factWrite / decide / stats / listMemory
-lib/doctor.mjs  read-only health check (cli.mjs doctor)
-mcp.mjs         MCP stdio server (6 tools)
-server.mjs      HTTP server + static UI
-cli.mjs         command line
+packages/core/lib/doctor.mjs  read-only health check (cli.mjs doctor)
+packages/core/mcp.mjs  MCP stdio server (6 tools)
+packages/core/server.mjs  HTTP server + static UI
+packages/core/cli.mjs  command line
 ui/index.html   web UI (tabbed)
 ui/sidebar.html web UI (sidebar)
 examples/       demo.mjs / mcp-config.json / curl.sh
 tests/          unit tests (node --test, no deps)
 eval/           evaluation scaffold run.mjs + synthetic sample
-adapters/dsh-panel/   DSH client panel (optional)
+packages/dsh-panel/   DSH client panel (optional)
 ```
 
 Data (all under `--dir`):

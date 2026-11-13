@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { collectChecks } from '../lib/doctor.mjs'
+import { collectChecks } from '../packages/core/lib/doctor.mjs'
 
 function tmp() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'memcore-doctor-'))

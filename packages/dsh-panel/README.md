@@ -9,7 +9,7 @@
 index.js         宿主半：同进程加载 lib/core.mjs，注册 /api/memcore/* 路由
 client.js        浏览器半：sidebar.panellist 入口 + main 面板（检索/事实/决策/档案四页）
 cordis.patch.yml 插件的 patch（insert 一条）
-lib/             内核快照（与仓库根 lib/ 同步；发布时一起更新）
+lib/             内核快照（与 packages/core/lib 同步；发布时一起更新）
 ```
 
 ## 安装
@@ -17,13 +17,13 @@ lib/             内核快照（与仓库根 lib/ 同步；发布时一起更新
 1. 复制到客户端 profile：
 
    ```bash
-   cp -r adapters/dsh-panel/. "C:/Users/you/.dsh/profiles/desktop/node_modules/dsh-memcore-panel/"
+   cp -r packages/dsh-panel/. "C:/Users/you/.dsh/profiles/desktop/node_modules/dsh-memcore-panel/"
    ```
 
 2. profile 的 `package.json` 里加依赖与 bundle：
 
    ```json
-   "dependencies": { "dsh-memcore-panel": "file:D:/path/to/memcore/adapters/dsh-panel" },
+   "dependencies": { "dsh-memcore-panel": "file:D:/path/to/memcore/packages/dsh-panel" },
    "dsh": { "profile": { "bundles": ["...", "dsh-memcore-panel"] } }
    ```
 

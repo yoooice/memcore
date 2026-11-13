@@ -1,0 +1,23 @@
+{
+  "name": "memcore-pipeline",
+  "version": "0.1.0",
+  "description": "memcore 的策展流水线：候选提炼、自动初审、事实层权重、查询路由、评测到期提醒。可选，不装也能用内核。",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "memcore-consolidate": "./consolidate.mjs",
+    "memcore-review": "./review.mjs",
+    "memcore-autofacts": "./autofacts.mjs",
+    "memcore-route": "./route.mjs",
+    "memcore-eval-watch": "./eval-watch.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yoooice/memcore.git",
+    "directory": "packages/pipeline"
+  },
+  "license": "MIT"
+}

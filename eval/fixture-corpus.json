@@ -42,7 +42,7 @@
   {
     "id": "panel",
     "title": "DSH 面板",
-    "text": "DSH 客户端面板在 adapters/dsh-panel，注册到左侧栏一级入口，四页：检索、事实层、决策台账、档案。它只是外壳，内核仍然是 lib/core.mjs。"
+    "text": "DSH 客户端面板在 packages/dsh-panel，注册到左侧栏一级入口，四页：检索、事实层、决策台账、档案。它只是外壳，内核仍然是 lib/core.mjs。"
   },
   {
     "id": "privacy",

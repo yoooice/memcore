@@ -1,0 +1,34 @@
+{
+  "name": "dsh-memcore",
+  "version": "0.1.0",
+  "description": "把 memcore 装进 DSH：每轮注入线索/档案索引/开场卡，并注册 recall、trace、remember、decide、fact_write、self_read、self_write、handoff_write 八个工具。",
+  "type": "module",
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "lib/",
+    "cordis.patch.yml"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "memory"
+  ],
+  "peerDependencies": {
+    "dsh": ">=0.2.2"
+  },
+  "peerDependenciesMeta": {
+    "dsh": {
+      "optional": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yoooice/memcore.git",
+    "directory": "packages/dsh-plugin"
+  },
+  "license": "MIT"
+}

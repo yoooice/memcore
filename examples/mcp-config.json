@@ -2,7 +2,7 @@
   "mcpServers": {
     "memcore": {
       "command": "node",
-      "args": ["D:/path/to/memcore/mcp.mjs"],
+      "args": ["D:/path/to/memcore/packages/core/mcp.mjs"],
       "env": {
         "MEMCORE_DIR": "C:/Users/you/.memcore",
         "MEMCORE_DOCS": "C:/Users/you/notes"

@@ -1,0 +1,39 @@
+{
+  "name": "memcore-memory",
+  "version": "0.2.0",
+  "description": "本地长期记忆库的内核：BM25 检索、事实层、决策台账、档案，可接 MCP / HTTP / CLI，零依赖。",
+  "type": "module",
+  "bin": {
+    "memcore": "./cli.mjs"
+  },
+  "files": [
+    "cli.mjs",
+    "mcp.mjs",
+    "server.mjs",
+    "lib/",
+    "ui/",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node server.mjs",
+    "mcp": "node mcp.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "memory",
+    "mcp",
+    "llm",
+    "agent",
+    "bm25",
+    "local-first"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yoooice/memcore.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/yoooice/memcore#readme",
+  "license": "MIT"
+}

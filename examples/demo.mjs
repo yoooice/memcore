@@ -3,7 +3,7 @@
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { createCore } from '../lib/core.mjs'
+import { createCore } from '../packages/core/lib/core.mjs'
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'memcore-demo-'))
 const docs = path.join(dir, 'memory')
