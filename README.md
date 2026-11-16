@@ -119,7 +119,7 @@ const context = mem.items.map((it) => `[${it.at}] ${it.role}: ${it.text}`).join(
 
 在 DeepSeek Harness 里，把记忆做成「每轮自动注入 + 工具」：线索、档案索引、开场卡、8 个工具。
 它依赖 `index.js` 的 DSH 插件接口（`sp.context` / `sp.section` / `inject`），**只在 DSH 里有意义**。
-安装见 `packages/dsh-plugin/README.md`。
+安装见 `packages/dsh-plugin/README.md`（不想自己动手：那里有一段可以直接粘给自己 AI 的话）。
 
 ### DSH 面板（`packages/dsh-panel`）
 
